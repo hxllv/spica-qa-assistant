@@ -14,11 +14,7 @@
     <div class="toast-body">{{ toast.toastText }}</div>
   </div>
 
-  <img
-    class="spica-logo"
-    src="https://allhoursproductb0b1.blob.core.windows.net/static-files/spica/logo-svg"
-    alt="SPICA INTERNATIONAL"
-  />
+  <img class="spica-logo" src="spica.png" alt="SPICA INTERNATIONAL" />
 
   <router-view @copy-to-clip="copyToClip"></router-view>
 </template>
@@ -108,6 +104,6 @@ export default {
 .spica-logo {
   margin-block: 2em;
   width: 70%;
-  max-width: 300px;
+  max-width: 500px;
 }
 </style>
