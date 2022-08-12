@@ -1,26 +1,113 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <router-link to="/" v-if="$route.path != '/'" class="back-button"
+    ><font-awesome-icon icon="fa-solid fa-arrow-left"
+  /></router-link>
+
+  <div class="toast fixed-top m-auto" ref="toast">
+    <div
+      :class="
+        toast.toastCode == 0
+          ? 'toast-header bg-success'
+          : 'toast-header bg-danger'
+      "
+    ></div>
+    <div class="toast-body">{{ toast.toastText }}</div>
+  </div>
+
+  <img
+    class="spica-logo"
+    src="https://allhoursproductb0b1.blob.core.windows.net/static-files/spica/logo-svg"
+    alt="SPICA INTERNATIONAL"
+  />
+
+  <router-view @copy-to-clip="copyToClip"></router-view>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { Toast } from "bootstrap/dist/js/bootstrap.js";
 
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+  mounted() {
+    this.toast.el = new Toast(this.$refs.toast);
+  },
+  data() {
+    return {
+      toast: {
+        el: null,
+        toastText: "",
+        toastCode: 0,
+      },
+    };
+  },
+  methods: {
+    showToast(data) {
+      this.toast.toastText = data.text;
+      this.toast.toastCode = data.code;
+      this.toast.el.show();
+    },
+    fallbackCopyTextToClipboard(text) {
+      var textArea = document.createElement("textarea");
+      textArea.value = text;
+
+      // Avoid scrolling to bottom
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        var successful = document.execCommand("copy");
+        var msg = successful ? "successful" : "unsuccessful";
+        console.log("Fallback: Copying text command was " + msg);
+        this.showToast({ code: 0, text: "Copied to clipboard" });
+      } catch (err) {
+        console.error("Fallback: Oops, unable to copy", err);
+        this.showToast({
+          code: 1,
+          text: "Error copying to clipboard",
+        });
+      }
+
+      document.body.removeChild(textArea);
+    },
+    copyToClip(text) {
+      if (!navigator.clipboard) {
+        this.fallbackCopyTextToClipboard(text);
+        return;
+      }
+      navigator.clipboard.writeText(text).then(
+        () => {
+          this.showToast({ code: 0, text: "Copied to clipboard" });
+          console.log("Async: Copying to clipboard was successful!");
+        },
+        (err) => {
+          console.error("Async: Could not copy text: ", err);
+          this.showToast({
+            code: 1,
+            text: "Error copying to clipboard",
+          });
+        }
+      );
+    },
+  },
+};
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+.back-button {
+  position: absolute;
+  left: 1em;
+  top: 1em;
+  transform: scale(1.5);
+  transform-origin: top left;
+}
+
+.spica-logo {
+  margin-block: 2em;
+  width: 70%;
+  max-width: 300px;
 }
 </style>
