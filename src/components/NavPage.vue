@@ -1,4 +1,5 @@
 <template>
+  <p class="lead">Start by clicking one of the list items below.</p>
   <div class="list-group">
     <router-link
       to="/qateamurlfixer"

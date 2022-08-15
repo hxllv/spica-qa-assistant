@@ -1,4 +1,22 @@
 <template>
+  <div class="w-75 p-1">
+    <p class="lead text-center">
+      Easily and quickly convert Postman tests to new syntax.
+    </p>
+    <p>Copy and paste the test with the old syntax into the input field.</p>
+    <p>
+      The "TEST RESPONSE BODY DATA VALUE" segment of the
+      <a
+        href="https://dev.azure.com/Spica-International/Spica%20Common/_git/QA?path=/Postman/How%20to%20write%20Postman%20tests%20with%20new%20syntax.md"
+      >
+        internal postman testing guidelines
+      </a>
+      is <strong>NOT</strong> supported, because checking and converting those
+      is a bit tricky. It will hopefully be added in the future.
+    </p>
+    <p>It is advised to double check the converted test if everything is OK.</p>
+  </div>
+
   <div class="row d-flex flex-column align-items-center w-75">
     <div class="form-group p-1 row">
       <label for="input">Input</label>
