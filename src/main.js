@@ -7,6 +7,7 @@ import App from "./App.vue";
 import QaTeamUrlFixer from "./components/QaTeamUrlFixer.vue";
 import PostmanTestUpdater from "./components/PostmanTestUpdater.vue";
 import NavPage from "./components/NavPage.vue";
+import TimestampGenerator from "./components/TimestampGenerator.vue";
 
 /* import the fontawesome core */
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -39,6 +40,11 @@ const router = createRouter({
       path: "/postmantestupdater",
       name: "PostmanTestUpdater",
       component: PostmanTestUpdater,
+    },
+    {
+      path: "/timestampgenerator",
+      name: "TimestampGenerator",
+      component: TimestampGenerator,
     },
   ],
 });

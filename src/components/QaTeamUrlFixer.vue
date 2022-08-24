@@ -11,6 +11,7 @@
       (e.g. URLs in "You have been invited to join X at All Hours" email).
     </p>
   </div>
+
   <div class="row d-flex flex-column align-items-center w-75">
     <div class="form-group p-1 row">
       <label for="input">Input</label>
@@ -41,6 +42,7 @@
 
 <script>
 export default {
+  emits: ["copyToClip"],
   data() {
     return {
       input: "",

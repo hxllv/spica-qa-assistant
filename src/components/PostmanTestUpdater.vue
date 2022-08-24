@@ -49,6 +49,7 @@
 
 <script>
 export default {
+  emits: ["copyToClip"],
   data() {
     return {
       input: "",
