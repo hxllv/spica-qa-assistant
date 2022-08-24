@@ -150,7 +150,7 @@ export default {
       this.generateTimestamp();
     },
     dow(newDow) {
-      localStorage.dow = newH12c;
+      localStorage.dow = newDow;
       this.generateTimestamp();
     },
   },
