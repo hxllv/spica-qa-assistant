@@ -1,18 +1,6 @@
 <template>
   <div class="w-75 p-1">
     <p class="lead text-center">Generate OnTime like timestamps for DevOps.</p>
-    <!-- <p>Copy and paste the test with the old syntax into the input field.</p>
-    <p>
-      The "TEST RESPONSE BODY DATA VALUE" segment of the
-      <a
-        href="https://dev.azure.com/Spica-International/Spica%20Common/_git/QA?path=/Postman/How%20to%20write%20Postman%20tests%20with%20new%20syntax.md"
-      >
-        internal postman testing guidelines
-      </a>
-      is <strong>NOT</strong> supported, because checking and converting those
-      is a bit tricky. It will hopefully be added in the future.
-    </p>
-    <p>It is advised to double check the converted test if everything is OK.</p> -->
   </div>
 
   <div class="row d-flex flex-column align-items-center w-75">
@@ -52,7 +40,9 @@
     <div class="form-group p-1 row">
       <label for="output">Output</label>
       <br />
-      <small class="form-text">Click on input to copy</small>
+      <small class="form-text"
+        >Clicking on input generates new timestamp and copies it</small
+      >
       <input
         v-model="output"
         class="form-control"
@@ -60,7 +50,7 @@
         name=""
         id="output"
         readonly
-        @click="$emit('copyToClip', output)"
+        @click="generateAndCopy"
       />
     </div>
   </div>
@@ -75,8 +65,8 @@ export default {
     if (!localStorage.dow) localStorage.dow = false;
 
     this.username = localStorage.username;
-    this.h12c = localStorage.h12c;
-    this.dow = localStorage.dow;
+    this.h12c = localStorage.h12c === "true" ? true : false;
+    this.dow = localStorage.dow === "true" ? true : false;
   },
   data() {
     return {
@@ -122,11 +112,11 @@ export default {
       let dow = "";
       let time = `${hh}:${mi}`;
 
-      if (this.dow) {
+      if (this.dow == true) {
         dow = `${this.dowArr[today.getDay()]}, `;
       }
 
-      if (this.h12c) {
+      if (this.h12c == true) {
         const amOrPm = Number(hh) >= 12 ? "PM" : "AM";
         hh = Number(hh) % 12 || 12;
 
@@ -138,6 +128,10 @@ export default {
       } on ${dow}${dd} ${mm} ${yyyy} at ${time} (UTC ${
         UTC >= 0 ? "+" + UTC : UTC
       })`;
+    },
+    generateAndCopy() {
+      this.generateTimestamp();
+      this.$emit("copyToClip", this.output);
     },
   },
   watch: {
