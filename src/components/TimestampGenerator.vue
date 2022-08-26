@@ -43,15 +43,14 @@
       <small class="form-text"
         >Clicking on input generates new timestamp and copies it</small
       >
-      <input
-        v-model="output"
-        class="form-control"
-        type="text"
-        name=""
-        id="output"
-        readonly
+      <div
+        class="my-3"
+        ref="output"
+        style="font-weight: bold; font-size: 14px"
         @click="generateAndCopy"
-      />
+      >
+        {{ output }}
+      </div>
     </div>
   </div>
 </template>
@@ -123,15 +122,41 @@ export default {
         time = `${String(hh).padStart(2, "0")}:${mi} ${amOrPm}`;
       }
 
-      this.output = `Edited by ${
+      this.output = `🔴 Edited by ${
         this.username
       } on ${dow}${dd} ${mm} ${yyyy} at ${time} (UTC ${
         UTC >= 0 ? "+" + UTC : UTC
-      })`;
+      }) 🔴`;
     },
     generateAndCopy() {
       this.generateTimestamp();
-      this.$emit("copyToClip", this.output);
+
+      const r = document.createRange();
+      r.selectNode(this.$refs.output);
+      const s = window.getSelection();
+      s.removeAllRanges();
+      s.addRange(r);
+
+      //ff specific to copy the boldness
+      //s.modify("move", "forward", "character");
+      let toastMsg = "";
+      let toastCode = 0;
+
+      try {
+        var successful = document.execCommand("copy");
+        if (successful) {
+          toastMsg = "Copied to clipboard";
+        } else {
+          toastMsg = "Couldn't copy";
+          toastCode = 1;
+        }
+      } catch (err) {
+        toastMsg = err;
+        toastCode = 1;
+      }
+
+      this.$emit("showToast", { text: toastMsg, code: toastCode });
+      //this.$emit("copyToClip", this.output);
     },
   },
   watch: {

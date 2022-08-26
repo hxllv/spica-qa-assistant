@@ -16,7 +16,7 @@
   <router-link to="/" class="spica-logo w-75 my-3">
     <img class="img-fluid" src="spica.png" alt="SPICA INTERNATIONAL" />
   </router-link>
-  <router-view @copy-to-clip="copyToClip"></router-view>
+  <router-view @copy-to-clip="copyToClip" @show-toast="showToast"></router-view>
 </template>
 
 <script>
