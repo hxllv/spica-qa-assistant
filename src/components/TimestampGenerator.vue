@@ -6,36 +6,52 @@
   <div class="row d-flex flex-column align-items-center w-75">
     <div class="form-group p-1 col-auto">
       <label for="name">Name</label>
-      <div class="input-group">
-        <input
-          v-model="username"
-          type="text"
-          name=""
-          id="name"
-          class="form-control"
-        />
-        <button class="btn btn-primary input-group-text">Set name</button>
-      </div>
+
+      <input
+        v-model="username"
+        type="text"
+        name=""
+        id="name"
+        class="form-control"
+      />
+    </div>
+    <div class="form-group p-1 col-auto">
+      <label for="emoji">Emoji / prefix & suffix</label>
+      <input
+        v-model="emoji"
+        type="text"
+        name=""
+        id="emoji"
+        class="form-control"
+      />
     </div>
     <div class="form-check p-1 col-auto">
       <label class="form-check-label" for="12h">Use 12 hour clock?</label>
       <input
-        v-model="h12c"
+        v-model="hour12"
         type="checkbox"
         name=""
         id="12h"
         class="form-check-input"
       />
     </div>
-    <div class="form-check p-1 col-auto">
-      <label class="form-check-label" for="dow">Add day of week?</label>
-      <input
-        v-model="dow"
-        type="checkbox"
-        name=""
-        id="dow"
-        class="form-check-input"
-      />
+    <div class="form-group p-1 col-5">
+      <label class="form-check-label" for="date-style">Date style</label>
+      <select v-model="dateStyle" id="date-style" class="form-select">
+        <option value="full">Full</option>
+        <option value="long">Long</option>
+        <option value="medium">Medium</option>
+        <option value="short">Short</option>
+      </select>
+    </div>
+    <div class="form-group p-1 col-5">
+      <label class="form-check-label" for="time-style">Time style</label>
+      <select v-model="timeStyle" id="time-style" class="form-select">
+        <option value="full">Full</option>
+        <option value="long">Long</option>
+        <option value="medium">Medium</option>
+        <option value="short">Short</option>
+      </select>
     </div>
     <div class="form-group p-1 row">
       <label for="output">Output</label>
@@ -57,106 +73,84 @@
 
 <script>
 export default {
-  emits: ["copyToClip"],
+  emits: ["copyToClip", "showToast"],
   mounted() {
     if (!localStorage.username) localStorage.username = "Default Name";
-    if (!localStorage.h12c) localStorage.h12c = false;
-    if (!localStorage.dow) localStorage.dow = false;
+    if (!localStorage.hour12) localStorage.hour12 = false;
+    if (!localStorage.timeStyle) localStorage.timeStyle = "long";
+    if (!localStorage.dateStyle) localStorage.dateStyle = "long";
+    if (!localStorage.emoji) localStorage.emoji = "🔴";
 
     this.username = localStorage.username;
-    this.h12c = localStorage.h12c === "true" ? true : false;
-    this.dow = localStorage.dow === "true" ? true : false;
+    this.hour12 = localStorage.hour12 === "true" ? true : false;
+    this.timeStyle = localStorage.timeStyle;
+    this.dateStyle = localStorage.dateStyle;
+    this.emoji = localStorage.emoji;
   },
   data() {
     return {
       username: "",
-      h12c: false,
-      dow: false,
+      hour12: false,
+      timeStyle: "long",
+      dateStyle: "long",
       output: "",
-      months: [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-      ],
-      dowArr: [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-      ],
+      emoji: "🔴",
     };
   },
   methods: {
     generateTimestamp() {
-      const today = new Date();
-      const dd = String(today.getDate()).padStart(2, "0");
-      const mm = this.months[today.getMonth()];
-      const yyyy = today.getFullYear();
-      let hh = String(today.getHours()).padStart(2, "0");
-      const mi = String(today.getMinutes()).padStart(2, "0");
-      const UTC = -today.getTimezoneOffset() / 60;
+      const hourCycle = this.hour12 ? "h12" : "h23";
 
-      let dow = "";
-      let time = `${hh}:${mi}`;
+      let date = new Intl.DateTimeFormat("en-GB", {
+        dateStyle: this.dateStyle,
+        timeStyle: this.timeStyle,
+        hourCycle: hourCycle,
+      }).format(new Date());
 
-      if (this.dow == true) {
-        dow = `${this.dowArr[today.getDay()]}, `;
-      }
-
-      if (this.h12c == true) {
-        const amOrPm = Number(hh) >= 12 ? "PM" : "AM";
-        hh = Number(hh) % 12 || 12;
-
-        time = `${String(hh).padStart(2, "0")}:${mi} ${amOrPm}`;
-      }
-
-      this.output = `🔴 Edited by ${
-        this.username
-      } on ${dow}${dd} ${mm} ${yyyy} at ${time} (UTC ${
-        UTC >= 0 ? "+" + UTC : UTC
-      }) 🔴`;
+      this.output = `${this.emoji} Edited by ${this.username} on ${date} ${this.emoji}`;
+    },
+    fallbackCopyTextToClipboard() {
+      const listener = (e) => {
+        try {
+          e.clipboardData.setData(
+            "text/html",
+            `<div style="font-weight: bold;">${this.output}</div>`
+          );
+          this.$emit("showToast", { text: "Copied to clipboard", code: 0 });
+        } catch (err) {
+          this.$emit("showToast", { text: err, code: 1 });
+        }
+        e.preventDefault();
+      };
+      document.addEventListener("copy", listener);
+      document.execCommand("copy");
+      document.removeEventListener("copy", listener);
     },
     generateAndCopy() {
       this.generateTimestamp();
 
-      const r = document.createRange();
-      r.selectNode(this.$refs.output);
-      const s = window.getSelection();
-      s.removeAllRanges();
-      s.addRange(r);
+      console.log(!window.ClipboardItem);
 
-      //ff specific to copy the boldness
-      //s.modify("move", "forward", "character");
-      let toastMsg = "";
-      let toastCode = 0;
-
-      try {
-        var successful = document.execCommand("copy");
-        if (successful) {
-          toastMsg = "Copied to clipboard";
-        } else {
-          toastMsg = "Couldn't copy";
-          toastCode = 1;
-        }
-      } catch (err) {
-        toastMsg = err;
-        toastCode = 1;
+      if (!navigator.clipboard || !window.ClipboardItem) {
+        this.fallbackCopyTextToClipboard();
+        return;
       }
 
-      this.$emit("showToast", { text: toastMsg, code: toastCode });
-      //this.$emit("copyToClip", this.output);
+      console.log("Clipboard API present");
+
+      const blob = new Blob(
+        [`<div style="font-weight: bold;">${this.output}</div>`],
+        { type: "text/html" }
+      );
+      const clipboardItem = new window.ClipboardItem({ "text/html": blob });
+      navigator.clipboard.write([clipboardItem]).then(
+        () => {
+          this.$emit("showToast", { text: "Copied to clipboard", code: 0 });
+        },
+        (err) => {
+          this.$emit("showToast", { text: err, code: 1 });
+        }
+      );
     },
   },
   watch: {
@@ -164,12 +158,20 @@ export default {
       localStorage.username = newName;
       this.generateTimestamp();
     },
-    h12c(newH12c) {
-      localStorage.h12c = newH12c;
+    hour12(newHour12) {
+      localStorage.hour12 = newHour12;
       this.generateTimestamp();
     },
-    dow(newDow) {
-      localStorage.dow = newDow;
+    timeStyle(newTimeStyle) {
+      localStorage.timeStyle = newTimeStyle;
+      this.generateTimestamp();
+    },
+    dateStyle(newDateStyle) {
+      localStorage.dateStyle = newDateStyle;
+      this.generateTimestamp();
+    },
+    emoji(newEmoji) {
+      localStorage.emoji = newEmoji;
       this.generateTimestamp();
     },
   },
